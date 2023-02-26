@@ -7,6 +7,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.Query;
+
 import java.util.List;
 
 
@@ -23,14 +24,23 @@ public class AuthorDaoImpl implements AuthorDao {
     }
 
     @Override
+    public List<Author> findAll() {
+        EntityManager em = getEntityManager();
+        try {
+            TypedQuery<Author> typedQuery = em.createNamedQuery("author_find_all", Author.class);
+            return typedQuery.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
     public List<Author> listAuthorByLastNameLike(String lastName) {
         EntityManager em = getEntityManager();
-
         try {
-            Query query = em.createQuery("SELECT a from Author a where a.lastName like :last_name");
+            Query query = em.createQuery("select a from Author a where a.lastName like :last_name");
             query.setParameter("last_name", lastName + "%");
             List<Author> authors = query.getResultList();
-
             return authors;
         } finally {
             em.close();
@@ -48,8 +58,9 @@ public class AuthorDaoImpl implements AuthorDao {
     @Override
     public Author findAuthorByName(String firstName, String lastName) {
         EntityManager em = getEntityManager();
-        TypedQuery<Author> query = em.createQuery("SELECT a FROM Author a " +
-                "WHERE a.firstName = :first_name and a.lastName = :last_name", Author.class);
+        //TypedQuery<Author> query = em.createQuery("SELECT a FROM Author a " +
+        //        "WHERE a.firstName = :first_name and a.lastName = :last_name", Author.class);
+        TypedQuery<Author> query = em.createNamedQuery("find_by_name", Author.class);
         query.setParameter("first_name", firstName);
         query.setParameter("last_name", lastName);
 
@@ -96,7 +107,7 @@ public class AuthorDaoImpl implements AuthorDao {
         em.close();
     }
 
-    private EntityManager getEntityManager(){
+    private EntityManager getEntityManager() {
         return emf.createEntityManager();
     }
 }

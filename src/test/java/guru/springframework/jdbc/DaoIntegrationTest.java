@@ -6,6 +6,7 @@ import guru.springframework.jdbc.dao.BookDao;
 import guru.springframework.jdbc.dao.BookDaoImpl;
 import guru.springframework.jdbc.domain.Author;
 import guru.springframework.jdbc.domain.Book;
+import net.bytebuddy.utility.RandomString;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -31,7 +32,30 @@ public class DaoIntegrationTest {
 
     @Autowired
     BookDao bookDao;
+    @Test
+    void testFindAllBooks() {
+        List<Book> books = bookDao.findAll();
 
+        assertThat(books).isNotNull();
+        assertThat(books.size()).isGreaterThan(0);
+    }
+    @Test
+    void testFindAllAuthors() {
+        List<Author> authors = authorDao.findAll();
+
+        assertThat(authors).isNotNull();
+        assertThat(authors.size()).isGreaterThan(0);
+    }
+
+    @Test
+    void testFindBookByISBN(){
+        Book book = new Book();
+        book.setIsbn("1234" + RandomString.make());
+        book.setTitle("ISBN TEST");
+        Book saved = bookDao.saveNewBook(book);
+        Book fetched = bookDao.findbyISBN(book.getIsbn());
+        assertThat(fetched).isNotNull();
+    }
     @Test
     void testListAuthorByLastNameLike() {
         List<Author> authors = authorDao.listAuthorByLastNameLike("Wall");
@@ -94,9 +118,13 @@ public class DaoIntegrationTest {
 
     @Test
     void testGetBookByName() {
-        Book book = bookDao.findBookByTitle("Clean Code");
-
-        assertThat(book).isNotNull();
+        Book book = new Book();
+        book.setIsbn("1342"+ RandomString.make());
+        book.setTitle("To Be Removed");
+       Book saved = bookDao.saveNewBook(book);
+        Book fetched = bookDao.findBookByTitle(book.getTitle());
+        assertThat(fetched).isNotNull();
+        bookDao.deleteBookById(saved.getId());
     }
 
     @Test

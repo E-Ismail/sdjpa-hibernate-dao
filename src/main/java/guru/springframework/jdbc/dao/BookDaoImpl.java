@@ -1,11 +1,14 @@
 package guru.springframework.jdbc.dao;
 
 import guru.springframework.jdbc.domain.Book;
+import jakarta.persistence.Query;
 import org.springframework.stereotype.Component;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
+
+import java.util.List;
 
 /**
  * Created by jt on 8/29/21.
@@ -19,6 +22,31 @@ public class BookDaoImpl implements BookDao {
     }
 
     @Override
+    public List<Book> findAll() {
+        EntityManager em = getEntityManager();
+        try {
+            TypedQuery<Book> query = em.createNamedQuery("find_all_book",Book.class);
+            return query.getResultList();
+        }finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public Book findbyISBN(String isbn) {
+        EntityManager em = getEntityManager();
+        try {
+            //Query query = em.createQuery("select b from Book b where b.isbn = :isbn");
+            TypedQuery<Book> query = em.createQuery("select b from Book b where b.isbn = :isbn", Book.class);
+            query.setParameter("isbn", isbn);
+            Book found =  query.getSingleResult();
+            return found;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
     public Book getById(Long id) {
         EntityManager em = getEntityManager();
         Book book = getEntityManager().find(Book.class, id);
@@ -29,8 +57,9 @@ public class BookDaoImpl implements BookDao {
     @Override
     public Book findBookByTitle(String title) {
         EntityManager em = getEntityManager();
-        TypedQuery<Book> query = em
-                .createQuery("SELECT b FROM Book b where b.title = :title", Book.class);
+        //TypedQuery<Book> query = em
+        //        .createQuery("SELECT b FROM Book b where b.title = :title", Book.class);
+        TypedQuery<Book> query = em.createNamedQuery("find_book_by_title", Book.class);
         query.setParameter("title", title);
         Book book = query.getSingleResult();
         em.close();
@@ -71,7 +100,7 @@ public class BookDaoImpl implements BookDao {
         em.close();
     }
 
-    private EntityManager getEntityManager(){
+    private EntityManager getEntityManager() {
         return emf.createEntityManager();
     }
 }
