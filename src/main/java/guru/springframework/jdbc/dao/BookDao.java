@@ -3,12 +3,9 @@ package guru.springframework.jdbc.dao;
 import guru.springframework.jdbc.domain.Book;
 
 /**
- * @author E.I.
- * <p>
- * {@code @Date}  11/13/2022
+ * Created by jt on 8/29/21.
  */
 public interface BookDao {
-
     Book getById(Long id);
 
     Book findBookByTitle(String title);
@@ -18,4 +15,5 @@ public interface BookDao {
     Book updateBook(Book book);
 
     void deleteBookById(Long id);
+
 }

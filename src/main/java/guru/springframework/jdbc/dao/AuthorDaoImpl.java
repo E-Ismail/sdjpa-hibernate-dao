@@ -6,6 +6,9 @@ import org.springframework.stereotype.Component;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
+import jakarta.persistence.Query;
+import java.util.List;
+
 
 /**
  * Created by jt on 8/28/21.
@@ -20,18 +23,39 @@ public class AuthorDaoImpl implements AuthorDao {
     }
 
     @Override
+    public List<Author> listAuthorByLastNameLike(String lastName) {
+        EntityManager em = getEntityManager();
+
+        try {
+            Query query = em.createQuery("SELECT a from Author a where a.lastName like :last_name");
+            query.setParameter("last_name", lastName + "%");
+            List<Author> authors = query.getResultList();
+
+            return authors;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
     public Author getById(Long id) {
-        return getEntityManager().find(Author.class, id);
+        EntityManager em = getEntityManager();
+        Author author = getEntityManager().find(Author.class, id);
+        em.close();
+        return author;
     }
 
     @Override
     public Author findAuthorByName(String firstName, String lastName) {
-        TypedQuery<Author> query = getEntityManager().createQuery("SELECT a FROM Author a " +
+        EntityManager em = getEntityManager();
+        TypedQuery<Author> query = em.createQuery("SELECT a FROM Author a " +
                 "WHERE a.firstName = :first_name and a.lastName = :last_name", Author.class);
         query.setParameter("first_name", firstName);
         query.setParameter("last_name", lastName);
 
-        return query.getSingleResult();
+        Author author = query.getSingleResult();
+        em.close();
+        return author;
     }
 
     @Override
@@ -41,17 +65,24 @@ public class AuthorDaoImpl implements AuthorDao {
         em.persist(author);
         em.flush();
         em.getTransaction().commit();
+        em.close();
         return author;
     }
 
     @Override
     public Author updateAuthor(Author author) {
         EntityManager em = getEntityManager();
-        em.joinTransaction();
-        em.merge(author);
-        em.flush();
-        em.clear();
-        return em.find(Author.class, author.getId());
+
+        try {
+            em.joinTransaction();
+            em.merge(author);
+            em.flush();
+            em.clear();
+            Author saveAuthor = em.find(Author.class, author.getId());
+            return saveAuthor;
+        } finally {
+            em.close();
+        }
     }
 
     @Override
@@ -62,6 +93,7 @@ public class AuthorDaoImpl implements AuthorDao {
         em.remove(author);
         em.flush();
         em.getTransaction().commit();
+        em.close();
     }
 
     private EntityManager getEntityManager(){

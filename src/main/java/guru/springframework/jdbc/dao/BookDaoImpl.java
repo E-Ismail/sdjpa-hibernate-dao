@@ -1,15 +1,14 @@
 package guru.springframework.jdbc.dao;
 
 import guru.springframework.jdbc.domain.Book;
+import org.springframework.stereotype.Component;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
-import org.springframework.stereotype.Component;
 
 /**
- * @author E.I.
- * <p>
- * {@code @Date}  11/13/2022
+ * Created by jt on 8/29/21.
  */
 @Component
 public class BookDaoImpl implements BookDao {
@@ -22,7 +21,7 @@ public class BookDaoImpl implements BookDao {
     @Override
     public Book getById(Long id) {
         EntityManager em = getEntityManager();
-        Book book= em.find(Book.class, id);
+        Book book = getEntityManager().find(Book.class, id);
         em.close();
         return book;
     }
@@ -30,11 +29,12 @@ public class BookDaoImpl implements BookDao {
     @Override
     public Book findBookByTitle(String title) {
         EntityManager em = getEntityManager();
-        TypedQuery<Book> query = em.createQuery("SELECT b from Book b " +
-                "WHERE b.title= :title", Book.class);
+        TypedQuery<Book> query = em
+                .createQuery("SELECT b FROM Book b where b.title = :title", Book.class);
         query.setParameter("title", title);
+        Book book = query.getSingleResult();
         em.close();
-        return query.getSingleResult();
+        return book;
     }
 
     @Override
@@ -55,7 +55,7 @@ public class BookDaoImpl implements BookDao {
         em.merge(book);
         em.flush();
         em.clear();
-        Book savedBook= em.find(Book.class, book.getId());
+        Book savedBook = em.find(Book.class, book.getId());
         em.getTransaction().commit();
         em.close();
         return savedBook;
@@ -65,13 +65,13 @@ public class BookDaoImpl implements BookDao {
     public void deleteBookById(Long id) {
         EntityManager em = getEntityManager();
         em.getTransaction().begin();
-        Book book = em.find(Book.class,id);
+        Book book = em.find(Book.class, id);
         em.remove(book);
         em.getTransaction().commit();
         em.close();
     }
 
-    private EntityManager getEntityManager() {
+    private EntityManager getEntityManager(){
         return emf.createEntityManager();
     }
 }
