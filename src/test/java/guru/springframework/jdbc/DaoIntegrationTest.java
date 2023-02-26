@@ -178,6 +178,31 @@ public class DaoIntegrationTest {
     }
 
     @Test
+    void testGetAuthotByNameCriteria(){
+        Author author = authorDao.findAuthorByNameCriteria("Craig","Walls");
+        assertThat(author).isNotNull();
+    }
+
+    @Test
+    void testGetBookByTitleCriteria(){
+        Book book = bookDao.findBookByTitleCriteria("Domain-Driven Design");
+        assertThat(book).isNotNull();
+    }
+
+    @Test
+    void testGetBookByTitleNative(){
+        Book book = bookDao.findBookByTitleNative("Domain-Driven Design");
+        assertThat(book).isNotNull();
+    }
+
+    @Test
+    void testGetAuthorByNameNative() {
+        Author author = authorDao.findAuthorByNameNative("Craig", "Walls");
+
+        assertThat(author).isNotNull();
+    }
+
+    @Test
     void testGetAuthorByName() {
         Author author = authorDao.findAuthorByName("Craig", "Walls");
 

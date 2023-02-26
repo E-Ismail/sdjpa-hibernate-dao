@@ -1,7 +1,12 @@
 package guru.springframework.jdbc.dao;
 
+import guru.springframework.jdbc.domain.Author;
 import guru.springframework.jdbc.domain.Book;
 import jakarta.persistence.Query;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.springframework.stereotype.Component;
 
 import jakarta.persistence.EntityManager;
@@ -25,9 +30,9 @@ public class BookDaoImpl implements BookDao {
     public List<Book> findAll() {
         EntityManager em = getEntityManager();
         try {
-            TypedQuery<Book> query = em.createNamedQuery("find_all_book",Book.class);
+            TypedQuery<Book> query = em.createNamedQuery("find_all_book", Book.class);
             return query.getResultList();
-        }finally {
+        } finally {
             em.close();
         }
     }
@@ -39,7 +44,7 @@ public class BookDaoImpl implements BookDao {
             //Query query = em.createQuery("select b from Book b where b.isbn = :isbn");
             TypedQuery<Book> query = em.createQuery("select b from Book b where b.isbn = :isbn", Book.class);
             query.setParameter("isbn", isbn);
-            Book found =  query.getSingleResult();
+            Book found = query.getSingleResult();
             return found;
         } finally {
             em.close();
@@ -98,6 +103,32 @@ public class BookDaoImpl implements BookDao {
         em.remove(book);
         em.getTransaction().commit();
         em.close();
+    }
+
+    @Override
+    public Book findBookByTitleCriteria(String title) {
+        EntityManager em = getEntityManager();
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Book> cq = cb.createQuery(Book.class);
+            Root<Book> root = cq.from(Book.class);
+            cq.select(root).where(cb.equal(root.get("title"), title));
+            return em.createQuery(cq).getSingleResult();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public Book findBookByTitleNative(String title) {
+        EntityManager em = getEntityManager();
+        try {
+            Query query = em.createNativeQuery("SELECT * FROM book b where b.title = :title", Book.class);
+            query.setParameter("title", title);
+            return (Book) query.getSingleResult();
+        } finally {
+            em.close();
+        }
     }
 
     private EntityManager getEntityManager() {
