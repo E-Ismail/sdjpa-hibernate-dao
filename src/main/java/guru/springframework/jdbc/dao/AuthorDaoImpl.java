@@ -41,8 +41,8 @@ public class AuthorDaoImpl implements AuthorDao {
         try {
             Query query = em.createQuery("select a from Author a where a.lastName like :last_name");
             query.setParameter("last_name", lastName + "%");
-            List<Author> authors = query.getResultList();
-            return authors;
+            List<Author> resultList = query.getResultList();
+            return resultList;
         } finally {
             em.close();
         }
@@ -90,8 +90,7 @@ public class AuthorDaoImpl implements AuthorDao {
             em.merge(author);
             em.flush();
             em.clear();
-            Author saveAuthor = em.find(Author.class, author.getId());
-            return saveAuthor;
+            return em.find(Author.class, author.getId());
         } finally {
             em.close();
         }
