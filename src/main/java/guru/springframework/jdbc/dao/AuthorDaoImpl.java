@@ -51,7 +51,7 @@ public class AuthorDaoImpl implements AuthorDao {
     @Override
     public Author getById(Long id) {
         EntityManager em = getEntityManager();
-        Author author = getEntityManager().find(Author.class, id);
+        Author author = em.find(Author.class, id);
         em.close();
         return author;
     }
